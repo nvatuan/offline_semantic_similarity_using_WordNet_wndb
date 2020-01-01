@@ -27,8 +27,8 @@ void Ptr::show() const {
 void Ptr::input(stringstream& ss) {
     ss >> this->pointer_symbol >> this->synset_offset >> this->pos >> this->source_target_hex;
     //
-    this->source_word_id = Auxiliary::hex_to_dec(source_target_hex, 0, 2);
-    this->target_word_id = Auxiliary::hex_to_dec(source_target_hex, 2, 4);
+    this->source_word_id = Ultility::hex_to_dec(source_target_hex, 0, 2);
+    this->target_word_id = Ultility::hex_to_dec(source_target_hex, 2, 4);
 }
 
 // =================================== class Index ===================================
@@ -134,12 +134,21 @@ class Data {
             __index[pos][this->synset_offset] = this->line_number - 1;
         }
 
+
+        // -- Data::operator() is a hash function for its instance, return a std::string-typed hash value
         std::string operator()() const {
-            string ss_type_st = std::to_string(this->line_number);
+            std::string ss_type_st = std::to_string(this->line_number);
             ss_type_st += this->ss_type;
             return ss_type_st;
         }
 
+        // -- custom comparision to make things faster
+        bool operator==(const Data& rhs) const {
+            // compare between two hashes produces by Data::operator()
+            return ((*this)()) == (rhs());
+        }
+
+        // -- index of current instance in datastructure
         const int idx() const {return this->line_number - 1;}
 };
 // ---------------------- definition -------------------------------------------
@@ -159,14 +168,14 @@ void Data::input(const std::string& S) {
     ss >> this->ss_type;
     ss >> this->w_cnt_hex;
 
-    this->w_cnt = Auxiliary::hex_to_dec(this->w_cnt_hex);
+    this->w_cnt = Ultility::hex_to_dec(this->w_cnt_hex);
 
     this->word.resize(this->w_cnt);
     this->lex_id.resize(this->w_cnt);
     for(int i = 0; i < this->w_cnt; i++) {
         char lex_id_hex;
         ss >> this->word[i] >> lex_id_hex;
-        this->lex_id[i] = Auxiliary::hexadec[lex_id_hex];
+        this->lex_id[i] = Ultility::hexadec[lex_id_hex];
     }
 
     ss >> this->p_cnt;
@@ -211,5 +220,6 @@ void Data::show(bool wordsonly) const {
     } else {
         for(int i = 0; i < w_cnt; i++) 
             cout << word[i] << " | ";
+        cout << '\n';
     }
 }
